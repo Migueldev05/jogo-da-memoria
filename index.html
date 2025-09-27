@@ -2,104 +2,255 @@
 <html lang="pt-br">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Jogo da Memória</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
-<header>
-    <h1>Jogo da Memória</h1>
-    <p class="contador" id="contador">
-        Jogadas: 0
-    </p>
-</header>
 <body>
-    <p id="vitoria">🎉 Você venceu! 🎉</p>
-    <section id="cartas_do_jogo">
-        <div class="carta" id="lobo">🐺</div>
-        <div class="carta" id="raposa">🦊</div>
-        <div class="carta" id="macaco">🐵</div>
-        <div class="carta" id="lobo">🐺</div>
-        <div class="carta" id="galinha">🐔</div>
-        <div class="carta" id="raposa">🦊</div>
-        <div class="carta" id="sapo">🐸</div>
-        <div class="carta" id="macaco">🐵</div>
-        <div class="carta" id="galinha">🐔</div>
-        <div class="carta" id="sapo">🐸</div>
-        <div class="carta" id="leao">🦁</div>
-        <div class="carta" id="peixe">🐟</div>
-        <div class="carta" id="leao">🦁</div>
-        <div class="carta" id="peixe">🐟</div>
-        <div class="carta" id="vaca">🐮</div>
-        <div class="carta" id="vaca">🐮</div>
-    </section>
-</body>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const cartasContainer = document.getElementById('cartas_do_jogo');
-        const contadorTexto = document.getElementById('contador');
-        const mensagemVitoria = document.getElementById('vitoria');
+    <h1>Jogo da Memória</h1>
 
-        let cartas = Array.from(cartasContainer.children);
+    <div id="menu-dificuldade">
+        <label for="dificuldade">Escolha a dificuldade: </label>
+        <select id="dificuldade">
+            <option value="4">Fácil (8 cartas)</option>
+            <option value="6" selected>Médio (12 cartas)</option>
+            <option value="8">Difícil (16 cartas)</option>
+            <label for="multijogador"
+                style="background:none; color:#fff; cursor:pointer; font-weight:600; user-select:none; margin-left:10px;">
+                <input type="checkbox" id="multijogador" />
+                Multijogador
+            </label>
+        </select>
+        <button id="btn-iniciar">Iniciar Jogo</button>
+    </div>
 
-        // Embaralhar
-        cartas = cartas.sort(() => 0.5 - Math.random());
-        cartas.forEach(carta => cartasContainer.appendChild(carta));
+    <div id="modo-ac-container">
+        <button id="btn-toggle-contraste">Ativar modo Alto Contraste</button>
+    </div>
 
-        // Esconder
-        cartas.forEach(carta => {
-            carta.dataset.valor = carta.innerText;
-            carta.innerText = '❓';
-        });
+    <div id="info-jogo">
+        <p id="vez-do-jogador">Vez: Jogador 1</p>
+        <p id="contador">Jogadas: 0</p>
+        <p id="temporizador">Tempo: 0s</p>
+        <p id="pontuacao-jogador1">Jogador 1: 0 pontos</p>
+        <p id="pontuacao-jogador2">Jogador 2: 0 pontos</p>
+        <p id="vitoria" style="display:none;"></p>
+    </div>
 
-        let cartaVirada = null;
-        let bloqueado = false;
-        let jogadas = 0;
-        let paresEncontrados = 0;
-        const totalPares = cartas.length / 2;
+    <section id="cartas_do_jogo"></section>
 
-        cartas.forEach(carta => {
-            carta.addEventListener('click', () => {
-                if (bloqueado || carta.innerText !== '❓') return;
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cartasContainer = document.getElementById('cartas_do_jogo');
+            const contadorTexto = document.getElementById('contador');
+            const temporizadorTexto = document.getElementById('temporizador');
+            const mensagemVitoria = document.getElementById('vitoria');
+            const menuDificuldade = document.getElementById('menu-dificuldade');
+            const infoJogo = document.getElementById('info-jogo');
+            const selectDificuldade = document.getElementById('dificuldade');
+            const btnIniciar = document.getElementById('btn-iniciar');
+            const vezDoJogadorTexto = document.getElementById('vez-do-jogador');
+            const pontuacaoJogador1Texto = document.getElementById('pontuacao-jogador1');
+            const pontuacaoJogador2Texto = document.getElementById('pontuacao-jogador2');
+            const btnToggleContraste = document.getElementById('btn-toggle-contraste');
+            const checkboxMultijogador = document.getElementById('multijogador');
+            let modoMultijogador = false;
+            const body = document.body;
+
+            const paresDisponiveis = [
+                { id: 'lobo', emoji: '🐺' },
+                { id: 'raposa', emoji: '🦊' },
+                { id: 'macaco', emoji: '🐵' },
+                { id: 'galinha', emoji: '🐔' },
+                { id: 'sapo', emoji: '🐸' },
+                { id: 'leao', emoji: '🦁' },
+                { id: 'peixe', emoji: '🐟' },
+                { id: 'vaca', emoji: '🐮' }
+            ];
+
+            let cartas = [];
+            let cartaVirada = null;
+            let bloqueado = false;
+            let jogadas = 0;
+            let paresEncontrados = 0;
+            let totalPares = 0;
+
+            let timerInterval = null;
+            let segundos = 0;
+
+            // Multijogador
+            let jogadorAtual = 1;
+            let pontuacaoJogador1 = 0;
+            let pontuacaoJogador2 = 0;
+
+            // Modo contraste
+            let modoAltoContraste = false;
+
+            function criarCartas(dificuldade) {
+                cartasContainer.innerHTML = '';
+                paresEncontrados = 0;
+                jogadas = 0;
+                segundos = 0;
+                cartaVirada = null;
+                bloqueado = false;
+                mensagemVitoria.style.display = 'none';
+                mensagemVitoria.textContent = '';
+                contadorTexto.textContent = 'Jogadas: 0';
+                temporizadorTexto.textContent = 'Tempo: 0s';
+                pontuacaoJogador1 = 0;
+                pontuacaoJogador2 = 0;
+                pontuacaoJogador1Texto.textContent = 'Jogador 1: 0 pontos';
+                pontuacaoJogador2Texto.textContent = 'Jogador 2: 0 pontos';
+                jogadorAtual = 1;
+                vezDoJogadorTexto.textContent = 'Vez: Jogador 1';
+
+                modoMultijogador = checkboxMultijogador.checked;
+
+                if (!modoMultijogador) {
+                    vezDoJogadorTexto.style.display = 'none';
+                    pontuacaoJogador2Texto.style.display = 'none';
+                } else {
+                    vezDoJogadorTexto.style.display = 'block';
+                    pontuacaoJogador2Texto.style.display = 'block';
+                }
+
+                infoJogo.style.display = 'block';
+
+                totalPares = parseInt(dificuldade);
+
+                const paresSelecionados = paresDisponiveis.slice(0, totalPares);
+
+                const cartasParaJogo = [];
+                paresSelecionados.forEach(par => {
+                    cartasParaJogo.push({ id: par.id, emoji: par.emoji });
+                    cartasParaJogo.push({ id: par.id, emoji: par.emoji });
+                });
+
+                cartas = cartasParaJogo.sort(() => 0.5 - Math.random());
+
+                cartas.forEach(({ id, emoji }) => {
+                    const divCarta = document.createElement('div');
+                    divCarta.classList.add('carta');
+                    divCarta.dataset.valor = emoji;
+                    divCarta.dataset.id = id;
+                    divCarta.innerText = '❓';
+                    cartasContainer.appendChild(divCarta);
+                });
+
+                cartasContainer.style.gridTemplateColumns = `repeat(4, 1fr)`;
+            }
+
+            function iniciarTemporizador() {
+                clearInterval(timerInterval);
+                segundos = 0;
+                temporizadorTexto.textContent = 'Tempo: 0s';
+                timerInterval = setInterval(() => {
+                    segundos++;
+                    temporizadorTexto.textContent = `Tempo: ${segundos}s`;
+                }, 1000);
+            }
+
+            function pararTemporizador() {
+                clearInterval(timerInterval);
+            }
+
+            function trocarJogador() {
+                jogadorAtual = jogadorAtual === 1 ? 2 : 1;
+                vezDoJogadorTexto.textContent = `Vez: Jogador ${jogadorAtual}`;
+            }
+
+            cartasContainer.addEventListener('click', e => {
+                const carta = e.target;
+                if (!carta.classList.contains('carta') || bloqueado) return;
+                if (carta.classList.contains('revelada') || carta.classList.contains('encontrada')) return;
+
+                if (jogadas === 0 && paresEncontrados === 0) {
+                    iniciarTemporizador();
+                }
 
                 carta.innerText = carta.dataset.valor;
                 carta.classList.add('revelada');
 
                 if (!cartaVirada) {
                     cartaVirada = carta;
-                } else {
-                    bloqueado = true;
-                    jogadas++;
-                    contadorTexto.innerText = `Jogadas: ${jogadas}`;
+                    return;
+                }
 
-                    if (carta.dataset.valor === cartaVirada.dataset.valor && carta !== cartaVirada) {
-                        // Verificar pares
-                        carta.removeEventListener('click', () => { });
-                        cartaVirada.removeEventListener('click', () => { });
+                bloqueado = true;
+                jogadas++;
+                contadorTexto.textContent = `Jogadas: ${jogadas}`;
+
+                if (carta.dataset.id === cartaVirada.dataset.id) {
+                    // Par correto
+                    paresEncontrados++;
+
+                    if (jogadorAtual === 1) {
+                        pontuacaoJogador1++;
+                        pontuacaoJogador1Texto.textContent = `Jogador 1: ${pontuacaoJogador1} pontos`;
+                    } else {
+                        pontuacaoJogador2++;
+                        pontuacaoJogador2Texto.textContent = `Jogador 2: ${pontuacaoJogador2} pontos`;
+                    }
+
+                    carta.classList.add('encontrada');
+                    cartaVirada.classList.add('encontrada');
+
+                    cartaVirada = null;
+                    bloqueado = false;
+
+                    if (paresEncontrados === totalPares) {
+                        pararTemporizador();
+                        mensagemVitoria.style.display = 'block';
+                        if (modoMultijogador) {
+                            if (pontuacaoJogador1 > pontuacaoJogador2) {
+                                mensagemVitoria.textContent = '🎉 Jogador 1 venceu! 🎉';
+                            } else if (pontuacaoJogador2 > pontuacaoJogador1) {
+                                mensagemVitoria.textContent = '🎉 Jogador 2 venceu! 🎉';
+                            } else {
+                                mensagemVitoria.textContent = '🤝 Empate! 🤝';
+                            }
+                        } else {
+                            mensagemVitoria.textContent = '🎉 Parabéns! Você completou o jogo!';
+                        }
+                    }
+
+                } else {
+                    // Par incorreto - espera e vira as cartas de volta, troca jogador
+                    setTimeout(() => {
+                        carta.innerText = '❓';
+                        cartaVirada.innerText = '❓';
+                        carta.classList.remove('revelada');
+                        cartaVirada.classList.remove('revelada');
                         cartaVirada = null;
                         bloqueado = false;
-                        paresEncontrados++;
-
-                        // Verificar vitória
-                        if (paresEncontrados === totalPares) {
-                            mensagemVitoria.style.display = 'block';
+                        if (modoMultijogador) {
+                            trocarJogador();
                         }
-
-                    } else {
-                        // Não é par
-                        setTimeout(() => {
-                            carta.innerText = '❓';
-                            cartaVirada.innerText = '❓';
-                            carta.classList.remove('revelada');
-                            cartaVirada.classList.remove('revelada');
-                            cartaVirada = null;
-                            bloqueado = false;
-                        }, 1000);
-                    }
+                    }, 1000);
                 }
             });
+
+            btnIniciar.addEventListener('click', () => {
+                criarCartas(selectDificuldade.value);
+            });
+
+            btnToggleContraste.addEventListener('click', () => {
+                modoAltoContraste = !modoAltoContraste;
+                if (modoAltoContraste) {
+                    body.classList.add('alto-contraste');
+                    btnToggleContraste.textContent = 'Desativar modo Alto Contraste';
+                } else {
+                    body.classList.remove('alto-contraste');
+                    btnToggleContraste.textContent = 'Ativar modo Alto Contraste';
+                }
+            });
+
+            // Inicia com dificuldade média (12 cartas = 6 pares)
+            criarCartas(selectDificuldade.value);
         });
-    });
-</script>
+    </script>
+</body>
+
 </html>

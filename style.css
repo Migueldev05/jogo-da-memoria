@@ -1,84 +1,210 @@
-body{
-    background-color: #000000;
+/* Reset básico */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #121212;
     margin: 0;
-    padding: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    border-left: 50px solid #020023;
-    border-right: 50px solid #020023;
+    padding: 20px 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #FFFFFF;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     min-height: 100vh;
-    text-align: center;
 }
 
-h1{
+h1 {
+    color: #BB86FC;
+    margin-bottom: 10px;
+    font-weight: 900;
     font-size: 3rem;
-    color: whitesmoke;
-}
-
-#vitoria {
-    display: none;
-    font-weight: bold;
-    color: green;
-}
-
-#contador{
-    color: rgb(189, 138, 56);
     text-align: center;
-    justify-content: center;
 }
 
-#cartas_do_jogo{
+/* Menu de dificuldade e botões */
+#menu-dificuldade {
+    margin-bottom: 15px;
+    text-align: center;
+    color: #FFFFFF;
+}
+
+#menu-dificuldade label,
+#menu-dificuldade select,
+#menu-dificuldade button,
+#menu-dificuldade input[type="checkbox"]  {
+    font-size: 1rem;
+    margin: 0 5px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background-color: #3700B3;
+    color: #FFFFFF;
+    transition: background-color 0.3s ease;
+}
+
+#menu-dificuldade input[type="checkbox"] {
+      background-color: transparent;
+      cursor: pointer;
+      width: auto;
+      padding: 0;
+      margin-left: 10px;
+      vertical-align: middle;
+      border: none;
+    }
+
+#menu-dificuldade button:hover,
+#menu-dificuldade select:hover {
+    background-color: #6200EE;
+}
+
+/* Botão modo alto contraste */
+#modo-ac-container {
+    margin-bottom: 15px;
+}
+
+#modo-ac-container button {
+    background-color: #3700B3;
+    color: #FFFFFF;
+    border: none;
+    padding: 7px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color 0.3s ease;
+}
+
+#modo-ac-container button:hover {
+    background-color: #6200EE;
+}
+
+/* Info do jogo */
+#info-jogo {
+    background-color: #03DAC6;
+    color: #121212;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-weight: 700;
+    user-select: none;
+    width: 100%;
+    max-width: 480px;
+    display: none;
+    text-align: center;
+}
+
+#info-jogo p {
+    margin: 5px 0;
+}
+
+/* Cartas */
+#cartas_do_jogo {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    margin: 20px auto;
     gap: 16px;
+    max-width: 480px;
+    width: 100%;
+    user-select: none;
 }
 
 .carta {
-    font-size: 2rem;
-    border: 2px solid #ff0000;
-    border-width: 5px;
-    border-radius: 1rem;
-    border-left: 15px solid #ff0000;
-    border-right: 15px solid #ff0000;
-    height: 50px;
-    width: 50px;
-    padding: 15px 15px;
+    background-color: #3700B3;
+    border: 3px solid #03DAC6;
+    border-radius: 12px;
+    font-size: 2.2rem;
     cursor: pointer;
-    background-color: rgb(255, 193, 47);
-
-    transition: transform 0.4s ease, background-color 0.4s ease;
-    transform-style: preserve-3d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80px;
+    width: 80px;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    color: #FFFFFF;
+    user-select: none;
+    perspective: 1000px;
+    position: relative;
 }
 
 .carta:hover {
-    transform: scale(1.1) rotateY(10deg);
+    background-color: #6200EE;
+    transform: scale(1.1);
+    border-color: #BB86FC;
 }
 
 .carta.revelada {
-    background-color: #b0f7ff;
-    transform: rotateY(180deg);
-    pointer-events: none;
+    background-color: #03DAC6;
+    color: #121212;
+    cursor: default;
+    transform: scale(1.05);
+    border-color: #BB86FC;
 }
 
-p{
-    font-size: 2rem;
-    font-family: Arial, Helvetica, sans-serif;
+.carta.encontrada {
+    background-color: #BB86FC;
+    color: #121212;
+    cursor: default;
+    border-color: #3700B3;
+    transform: scale(1.1);
+}
+
+/* Mensagem de vitória */
+#vitoria {
     font-weight: bold;
+    color: #cf3dff;
+    margin-top: 15px;
+    font-size: 1.5rem;
 }
 
-@media (max-width: 600px){
-    #cartas_em_jogo {
+/* Modo Alto Contraste */
+.alto-contraste body,
+.alto-contraste {
+    background-color: #000000 !important;
+    color: #FFD600 !important;
+}
+
+.alto-contraste #menu-dificuldade label,
+.alto-contraste #menu-dificuldade select,
+.alto-contraste #menu-dificuldade button,
+.alto-contraste #modo-ac-container button {
+    background-color: #000000 !important;
+    color: #FFD600 !important;
+    border: 2px solid #FFD600 !important;
+}
+
+.alto-contraste #info-jogo {
+    background-color: #000000 !important;
+    color: #FFD600 !important;
+    border: 2px solid #FFD600 !important;
+}
+
+.alto-contraste .carta {
+    background-color: #000000 !important;
+    border-color: #FFD600 !important;
+    color: #FFD600 !important;
+}
+
+.alto-contraste .carta:hover {
+    background-color: #FFD600 !important;
+    color: #000000 !important;
+    border-color: #FFD600 !important;
+    transform: scale(1.1) !important;
+}
+
+.alto-contraste h1 {
+    color: #FFD600 !important;
+}
+
+/* Responsivo simples */
+@media (max-width: 500px) {
+    #cartas_do_jogo {
         grid-template-columns: repeat(3, 1fr);
     }
-    
+
     .carta {
-        width: 60px;
-        height: 60px;
-        font-size: 2rem
+        height: 70px;
+        width: 70px;
+        font-size: 1.8rem;
     }
 }
