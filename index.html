@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,95 @@
 
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <!-- O Tiago é foda. -->
+    <h1>Jogo da Memória</h1>
+    <p class="contador" id="contador">Jogadas: 0</p>
+    <p id="vitoria" href="style.css">🎉 Você venceu! 🎉</p>
+    <section id="cartas_do_jogo">
+        <div class="carta" id="lobo">🐺</div>
+        <div class="carta" id="raposa">🦊</div>
+        <div class="carta" id="macaco">🐵</div>
+        <div class="carta" id="lobo">🐺</div>
+        <div class="carta" id="galinha">🐔</div>
+        <div class="carta" id="raposa">🦊</div>
+        <div class="carta" id="sapo">🐸</div>
+        <div class="carta" id="macaco">🐵</div>
+        <div class="carta" id="galinha">🐔</div>
+        <div class="carta" id="sapo">🐸</div>
+        <div class="carta" id="leao">🦁</div>
+        <div class="carta" id="peixe">🐟</div>
+        <div class="carta" id="leao">🦁</div>
+        <div class="carta" id="peixe">🐟</div>
+        <div class="carta" id="vaca">🐮</div>
+        <div class="carta" id="vaca">🐮</div>
+    </section>
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const cartasContainer = document.getElementById('cartas_do_jogo');
+        const contadorTexto = document.getElementById('contador');
+        const mensagemVitoria = document.getElementById('vitoria');
+
+        let cartas = Array.from(cartasContainer.children);
+
+        // Embaralhar
+        cartas = cartas.sort(() => 0.5 - Math.random());
+        cartas.forEach(carta => cartasContainer.appendChild(carta));
+
+        // Esconder
+        cartas.forEach(carta => {
+            carta.dataset.valor = carta.innerText;
+            carta.innerText = '❓';
+        });
+
+        let cartaVirada = null;
+        let bloqueado = false;
+        let jogadas = 0;
+        let paresEncontrados = 0;
+        const totalPares = cartas.length / 2;
+
+        cartas.forEach(carta => {
+            carta.addEventListener('click', () => {
+                if (bloqueado || carta.innerText !== '❓') return;
+
+                carta.innerText = carta.dataset.valor;
+                carta.classList.add('revelada');
+
+                if (!cartaVirada) {
+                    cartaVirada = carta;
+                } else {
+                    bloqueado = true;
+                    jogadas++;
+                    contadorTexto.innerText = `Jogadas: ${jogadas}`;
+
+                    if (carta.dataset.valor === cartaVirada.dataset.valor && carta !== cartaVirada) {
+                        // Verificar pares
+                        carta.removeEventListener('click', () => { });
+                        cartaVirada.removeEventListener('click', () => { });
+                        cartaVirada = null;
+                        bloqueado = false;
+                        paresEncontrados++;
+
+                        // Verificar vitória
+                        if (paresEncontrados === totalPares) {
+                            mensagemVitoria.style.display = 'block';
+                        }
+
+                    } else {
+                        // Não é par
+                        setTimeout(() => {
+                            carta.innerText = '❓';
+                            cartaVirada.innerText = '❓';
+                            carta.classList.remove('revelada');
+                            cartaVirada.classList.remove('revelada');
+                            cartaVirada = null;
+                            bloqueado = false;
+                        }, 1000);
+                    }
+                }
+            });
+        });
+    });
+</script>
 </html>
