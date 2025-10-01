@@ -1,7 +1,7 @@
-LER – Levantamento de Requisitos 
-(Jogo da Memória) 
+LER – Levantamento de Requisitos (Jogo da Memória) 
 
 O documento a seguir menciona e desenvolve os requisitos funcionais e não-funcionais a respeito do Projeto de Reposição do dia 27/09/25, o Jogo da Memória, desenvolvido por Tiago Alves da Silva e Miguel Moreira da Silva. 
+
 
 
 Requisitos Funcionais: 
@@ -31,6 +31,7 @@ Requisitos Funcionais:
 ● RF12: O sistema deve permitir que o jogador reinicie a partida clicando em “Iniciar Jogo”. 
 
 ● RF13: O sistema deve oferecer um botão para alternar o modo de alto contraste, alterando o esquema de cores para preto e amarelo. 
+
 
 
 Requisitos Não-funcionais: 
